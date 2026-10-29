@@ -131,7 +131,7 @@ async function send(kind,body,url){
 }
 function sendText(){const v=$('#txt').value.trim(); if(!v)return; $('#txt').value=''; send('text',v); $('#txt').focus();}
 $('#snd').onclick=sendText;
-['pointerdown','mousedown','touchstart'].forEach(ev=>$('#snd').addEventListener(ev,e=>e.preventDefault(),{passive:false})); // keep focus in the text box so the keyboard stays open
+['pointerdown','mousedown'].forEach(ev=>$('#snd').addEventListener(ev,e=>e.preventDefault())); // keep focus in the text box so the keyboard stays open
 $('#txt').onkeydown=e=>e.key==='Enter'&&sendText();
 $('#att').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{
@@ -205,6 +205,15 @@ function fit(){
 if(vv){vv.addEventListener('resize',fit);vv.addEventListener('scroll',()=>window.scrollTo(0,0));}
 addEventListener('resize',fit); fit();
 $('#txt').addEventListener('focus',()=>setTimeout(fit,300));
+
+/* ---- pull down at the top of a list to refresh it (does not reload the page, so calls are safe) ---- */
+function pull(el,fn){
+  let y=null;
+  el.addEventListener('touchstart',e=>{y=el.scrollTop<=0?e.touches[0].clientY:null},{passive:true});
+  el.addEventListener('touchend',e=>{if(y!==null&&e.changedTouches[0].clientY-y>90)fn();y=null},{passive:true});
+}
+pull($('#list'),()=>chats());
+pull($('#msgs'),()=>{if(peer)open(peer)});
 
 /* ---- start ---- */
 show('login'); if(localStorage.nick) login(localStorage.nick);
